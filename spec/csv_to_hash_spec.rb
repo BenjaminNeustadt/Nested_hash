@@ -121,8 +121,7 @@ RSpec.describe '#data_parse' do
     expect(actual).to eq expected
   end
 
-  # I think at this stage it is useful to test with real data
-  it 'parses three rows: two model test, one real data row' do
+  it 'parses three rows two model test, one real row' do
 
     input_csv =
     <<~CSV
@@ -169,5 +168,52 @@ RSpec.describe '#data_parse' do
     expect(actual).to eq expected
   end
 
-end
+  it 'does not include a row if Entry.status signals "Removed"' do
 
+    input_csv =
+    <<~CSV
+      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1.1.1,CHTS V1,GBCS Version 1,image1hash
+      Version 2,2,Current,Type_Meter,Mfg_2,Model_2,2.0.0,AC,2.2.0,2.2.2,CHTS V2,GBCS Version 2,image2hash
+      Version 2.051 Issued on 21-09-2022,1,Current,Communications Hub,106C,4331,0,AC,433100AC,124074DA,"CHTS V1.0 ","GBCS Version 1.0 ",137ED5BC81A21F6D2187BC380381AEA7705BF65D3E4DAEA28EFD44113079D5E9
+      Version 2.051 Issued on 21-09-2022,23,Removed,Gas Smart Meter,1063,4772,1,01,47720101,03030236,"SMETS V2.0 ","GBCS Version 1.0 ",DDF62A640765028BA5C8412F864EF09D6D0508A90849017D0232F663460200A5
+    CSV
+
+    expected = {
+       'Type_Communications' => {            # D (Device_Type.name)
+         'Mfg_1' => {                        # E (Device_Model.manufacturer_identifier)
+           '1.1.0' => {                      # I (Device_Model.model_identifier_concatenated_with_hardware_version)
+             firmware_version: '1.1.1',      # J (Device_Model.firmware_version)
+             smets_chts_version: 'CHTS V1',  # K (SMETS_CHTS Version.Version_number_and_effective_date)
+             gbcs_version: 'GBCS Version 1', # L (GBCS Version.version_number)
+             image_hash: 'image1hash'        # M (Manufacturer_Image.hash)
+           }
+         }
+       },
+       'Type_Meter' => {                     # D (Device_Type.name)
+         'Mfg_2' => {                        # E (Device_Model.manufacturer_identifier)
+           '2.2.0' => {                      # I (Device_Model.model_identifier_concatenated_with_hardware_version)
+             firmware_version: '2.2.2',      # J (Device_Model.firmware_version)
+             smets_chts_version: 'CHTS V2',  # K (SMETS_CHTS Version.Version_number_and_effective_date)
+             gbcs_version: 'GBCS Version 2', # L (GBCS Version.version_number)
+             image_hash: 'image2hash'        # M (Manufacturer_Image.hash)
+           }
+         }
+       },
+      'Communications Hub' => {
+        '106C' => {
+          '433100AC' => {
+            firmware_version: '124074DA',
+            smets_chts_version: 'CHTS V1.0 ',
+            gbcs_version: 'GBCS Version 1.0 ',
+            image_hash: '137ED5BC81A21F6D2187BC380381AEA7705BF65D3E4DAEA28EFD44113079D5E9'
+          }
+        }
+      }
+    }
+
+    actual = data_parse(input_csv)
+    expect(actual).to eq expected
+  end
+
+end

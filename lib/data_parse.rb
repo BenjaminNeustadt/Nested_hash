@@ -18,8 +18,8 @@ def data_parse(string_input)
         }
       }
     }
-
-    data.merge!(specific_row)
+    # We can put the removal here. although I would rather put the check at the beginning - though this is easiest to do for now
+    data.merge!(specific_row) unless row["Entry.status"] == "Removed"
   end
   data
 end
