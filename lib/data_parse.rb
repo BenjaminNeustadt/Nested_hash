@@ -11,8 +11,10 @@ def data_parse(csv_file)
     model_hardware_version = row["Device_Model.model_identifier_concatenated_with_hardware_version"]
 
     # If the key is not already in use, we begin building the outermost key
+    # We ask if the key already exists, if it doesn't "create a new empty hash"
     data[device_type] ||= {}
-    data[device_type][manufacturer] = {}
+    # We now do the same for the other outermost key
+    data[device_type][manufacturer] ||= {}
     data[device_type][manufacturer][model_hardware_version] = {
             firmware_version: row["Device_Model.firmware_version"],                          # J (Device_Model.firmware_version)
             smets_chts_version: row["SMETS_CHTS Version.Version_number_and_effective_date"], # K (SMETS_CHTS Version.Version_number_and_effective_date)
