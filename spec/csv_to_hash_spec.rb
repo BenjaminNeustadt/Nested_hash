@@ -1,5 +1,6 @@
 require_relative '../lib/data_parse.rb'
 
+
 RSpec.describe '#data_parse' do
 
   let(:input_csv) do
@@ -13,6 +14,13 @@ RSpec.describe '#data_parse' do
     <<~CSV
       Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
       Version 2,2,Current,Type_Meter,Mfg_2,Model_2,2.0,AC,2.0,2.0,CHTS V2,GBCS Version 2,image2hash
+    CSV
+  end
+
+  let(:input_csv_3) do
+    <<~CSV
+      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+      Version 3,3,Current,Type_Boiler,Mfg_3,Model_3,3.0,AC,3.0,3.0,CHTS V3,GBCS Version 3,image3hash
     CSV
   end
   #  A          B            C              D              E                                     F                                  G                                                      H                                     I                                                       J                  K                                                    L                              M
@@ -39,7 +47,7 @@ RSpec.describe '#data_parse' do
     expect(actual).to eq expected_output
   end
 
-  it "parses a different a csv file with one row " do
+  it 'parses a different a csv file with one row' do
 
     expected = {
       'Type_Meter' => {
@@ -57,6 +65,25 @@ RSpec.describe '#data_parse' do
     actual = data_parse(input_csv_2)
     expect(actual).to eq expected
   end
-		  #Version 3.01 Issued 09-2022,Current,Type_Meter,Manufacturer_2,Model_2,2.0.0,2.0.0,2.0.0,image2hash
+
+  it 'parses a different a csv file with one row' do
+
+    expected = {
+      'Type_Boiler' => {
+        'Mfg_3' => {
+          'Model_3' => {
+            firmware_version: '3.0',
+            smets_chts_version: 'CHTS V3',
+            gbcs_version: 'GBCS Version 3',
+            image_hash: 'image3hash'
+          }
+        }
+      }
+    }
+
+    actual = data_parse(input_csv_3)
+    expect(actual).to eq expected
+  end
 
 end
+
