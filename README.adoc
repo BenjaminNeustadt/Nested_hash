@@ -40,3 +40,24 @@ The corresponding values at the innermost level are each a hash composed as:
 The data from all rows in the worksheet must be included in the Hash,
 except those marked "Removed" in *column C*, which must be excluded.
 Add comments to explain your solution and why you believe it is optimal
+
+
+
+== Notes
+
+.Should look something like this:
+[source, rb]
+----
+  {
+    "Column D value"=>{
+      "Column E value"=>{
+        "Column I value"=>{
+          :firmware_version=>    "Column J value",
+          :smets_chts_version=>  "Column K value",
+          :gbcs_version=>        "Column L value",
+          :image_hash=>          "Column M value"
+        }
+      }
+    }
+  }
+----
