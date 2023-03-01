@@ -282,5 +282,37 @@ RSpec.describe '#data_parse' do
      expect(actual).to eq expected
    end
 
-end
+   it 'It groups with duplicate headers/keys for "third" keys' do
 
+     input_csv =
+     <<~CSV
+       Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+       Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1.1.1,CHTS V1,GBCS Version 1,image1hash
+       Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1a,GBCS Version 1a,image1Ahash
+     CSV
+
+     expected = {
+       'Type_Communications' => {
+         'Mfg_1' => {
+           '1.1.0' => {
+             'firmware_version' => {
+               '1.1.1' => {
+                 :gbcs_version       => "GBCS Version 1a",
+                 :smets_chts_version => "CHTS V1a",
+                 :image_hash         => "image1Ahash"
+               },
+               '1a.1.1' => {
+                 :smets_chts_version => 'CHTS V1',
+                 :gbcs_version       => 'GBCS Version 1',
+                 :image_hash         => 'image1hash'
+               }
+             }
+           }
+         }
+       }
+     }
+		 actual = data_parse(input_csv)
+		 expect(actual).to eq ""
+	 end
+
+end
