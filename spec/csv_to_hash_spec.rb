@@ -282,7 +282,7 @@ RSpec.describe '#data_parse' do
      expect(actual).to eq expected
    end
 
-   xit 'It groups with duplicate headers/keys for "third" keys' do
+   it 'It groups with duplicate headers/keys for "third" keys' do
 
      input_csv =
      <<~CSV
@@ -312,7 +312,8 @@ RSpec.describe '#data_parse' do
     }
   
 		 actual = data_parse(input_csv)
-		 expect(actual).to eq ""
+		 expect(actual).to eq expected
 	 end
+
 
 end
