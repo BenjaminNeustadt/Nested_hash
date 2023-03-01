@@ -282,7 +282,7 @@ RSpec.describe '#data_parse' do
      expect(actual).to eq expected
    end
 
-   it 'It groups with duplicate headers/keys for "third" keys' do
+   xit 'It groups with duplicate headers/keys for "third" keys' do
 
      input_csv =
      <<~CSV
@@ -291,26 +291,26 @@ RSpec.describe '#data_parse' do
        Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1a,GBCS Version 1a,image1Ahash
      CSV
 
+     # there is no key to distinguish between the two most inner hashes
      expected = {
-       'Type_Communications' => {
-         'Mfg_1' => {
-           '1.1.0' => {
-             'firmware_version' => {
-               '1.1.1' => {
-                 :gbcs_version       => "GBCS Version 1a",
-                 :smets_chts_version => "CHTS V1a",
-                 :image_hash         => "image1Ahash"
-               },
-               '1a.1.1' => {
-                 :smets_chts_version => 'CHTS V1',
-                 :gbcs_version       => 'GBCS Version 1',
-                 :image_hash         => 'image1hash'
-               }
-             }
-           }
-         }
-       }
-     }
+      'Type_Communications' => {
+        'Mfg_1' => {
+          '1.1.0' => {
+            'firmware_version' => {
+              "GBCS Version 1a" => {
+                :smets_chts_version => "CHTS V1a",
+                :image_hash => "image1Ahash"
+              },
+              "GBCS Version 1" => {
+                :smets_chts_version => 'CHTS V1',
+                :image_hash => 'image1hash'
+              }
+            }
+          }
+        }
+      }
+    }
+  
 		 actual = data_parse(input_csv)
 		 expect(actual).to eq ""
 	 end

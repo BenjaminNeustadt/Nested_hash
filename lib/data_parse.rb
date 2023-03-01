@@ -16,12 +16,14 @@ def data_parse(csv_file)
     gbcs_version = row["GBCS Version.version_number"]
     image_hash = row["Manufacturer_Image.hash"] 
 
-    # If the key is not already in use, we begin building the outermost key
+    # If the key is not already in use, we begin building the outermost key "Device Type"
     # We ask if the key already exists, if it doesn't "create a new empty hash"
     data[device_type] ||= {}
 
-    # We now do the same for the other outermost key
+    # We now do the same for the other outermost key "Manufacturer"
     data[device_type][manufacturer] ||= {}
+
+    #unless data[device_type][manufacturer][model_hardware_version]
 
     data[device_type][manufacturer][model_hardware_version] = {
             firmware_version: firmware_version,                          
@@ -37,7 +39,9 @@ end
 
 
 =begin
+
 _END_
+==NOTES
     data[device_type][manufacturer][model_hardware_version] ||= {}
 
     inner_hash = 
