@@ -2,18 +2,6 @@ require 'csv'
 
 $INFO = false
 
-  DEVICE_TYPE             = "Device_Type.name"
-  MANUFACTURER            = "Device_Model.manufacturer_identifier"
-  MODEL_HARDWARE_VERSION  = "Device_Model.model_identifier_concatenated_with_hardware_version"
-  FIRMWARE_VERSION        = "Device_Model.firmware_version"
-  SMETS_CHTS              = "SMETS_CHTS Version.Version_number_and_effective_date"
-  GBCS_VERSION            = "GBCS Version.version_number" 
-  IMAGE_HASH              = "Manufacturer_Image.hash"
-
-
-
-
-
 class Row
 
   OUTER_HASH_VALUES =  {
