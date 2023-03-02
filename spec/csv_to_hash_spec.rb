@@ -282,118 +282,38 @@ RSpec.describe '#data_parse' do
      expect(actual).to eq expected
    end
 
-   it 'It groups with duplicate headers/keys for "third inner-key" - 2 values ' do
+  it 'It stores hash in array with other hash if the key is already in use' do
 
-     input_csv =
-     <<~CSV
-       Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
-       Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1.1.1,CHTS V1,GBCS Version 1,image1hash
-       Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1a,GBCS Version 1a,image1Ahash
-     CSV
+    input_csv =
+    <<~CSV
+      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1.1.1,CHTS V1,GBCS Version 1,image1hash
+      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1a.0.0,AC,1.1.0,1a.1.1,CHTS V1a,GBCS Version 1a,image1Ahash
+    CSV
 
-     # there is no key to distinguish between the two most inner hashes
-     expected = {
-      'Type_Communications' => {
-        'Mfg_1' => {
-          '1.1.0' => {
-            '1a.1.1' => {
-              "GBCS Version 1a" => {
-                :smets_chts_version => "CHTS V1a",
-                :image_hash => "image1Ahash"
-              },
-              "GBCS Version 1" => {
-                :smets_chts_version => 'CHTS V1',
-                :image_hash => 'image1hash'
-              }
-            }
+    expected = {
+      'Type_Communications' => {            
+        'Mfg_1' => {                        
+          '1.1.0' => [
+          {                      
+            firmware_version: '1.1.1',      
+            smets_chts_version: 'CHTS V1',  
+            gbcs_version: 'GBCS Version 1', 
+            image_hash: 'image1hash'        
+          },
+          {
+            :firmware_version => "1a.1.1",
+            :smets_chts_version => "CHTS V1a",
+            :gbcs_version => "GBCS Version 1a",
+            :image_hash => "image1Ahash"
           }
+         ]
         }
       }
     }
-  
-		 actual = data_parse(input_csv)
-		 expect(actual).to eq expected
-	 end
 
-   it 'It groups with duplicate headers/keys for "third inner-key" - 3 values' do
-
-    input_csv =
-    <<~CSV
-      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1,GBCS Version 1,image1hash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1a,GBCS Version 1a,image1Ahash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1b,GBCS Version 1b,image1Ahash
-    CSV
-
-    # there is no key to distinguish between the two most inner hashes
-    expected = {
-     'Type_Communications' => {
-       'Mfg_1' => {
-         '1.1.0' => {
-           '1a.1.1' => {
-             "GBCS Version 1" => {
-               :smets_chts_version => 'CHTS V1',
-               :image_hash => 'image1hash'
-             },
-             "GBCS Version 1a" => {
-               :smets_chts_version => "CHTS V1a",
-               :image_hash => "image1Ahash"
-             },
-             "GBCS Version 1b" => {
-               :smets_chts_version => 'CHTS V1b',
-               :image_hash => 'image1Ahash'
-             }
-           }
-         }
-       }
-     }
-   }
- 
-    actual = data_parse(input_csv)
-    expect(actual).to eq expected
-  end
-
-  it 'It groups with duplicate headers/keys for "thrid inner-key" - 4 values' do
-
-    input_csv =
-    <<~CSV
-      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1,GBCS Version 1,image1hash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1a,GBCS Version 1a,image1Ahash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1b,GBCS Version 1b,image1Ahash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1b,GBCS Version 1c,image1Ahash
-    CSV
-
-    expected = {
-     'Type_Communications' => {
-       'Mfg_1' => {
-         '1.1.0' => {
-           '1a.1.1' => {
-             "GBCS Version 1" => {
-               :smets_chts_version => 'CHTS V1',
-               :image_hash => 'image1hash'
-             },
-             "GBCS Version 1a" => {
-               :smets_chts_version => "CHTS V1a",
-               :image_hash => "image1Ahash"
-             },
-             "GBCS Version 1b" => {
-               :smets_chts_version => 'CHTS V1b',
-               :image_hash => 'image1Ahash'
-             },
-             "GBCS Version 1c" => {
-              :smets_chts_version => 'CHTS V1b',
-              :image_hash => 'image1Ahash'
-            }
-           }
-         }
-       }
-     }
-   }
- 
     actual = data_parse(input_csv)
     expect(actual).to eq expected
   end
 
 end
-
