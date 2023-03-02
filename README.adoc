@@ -76,7 +76,9 @@ Simplcov is used to check for code coverage.
 
 == Approach
 
-== Notes
+The different classes are currently all inside one file to facilitate reading.
+
+=== Notes
 
 .My preliminary understanding was that it shuold look something like this
 .Should look something like this:
