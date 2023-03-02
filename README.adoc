@@ -68,6 +68,14 @@ bundle install
 rspec -fd
 ----
 
+- Run the script:
+
+----
+bin/csv-to-hash
+----
+
+* The file is currently informed inside the executable file in bin/
+
 == Testing
 
 The testing suite used is Rspec.
