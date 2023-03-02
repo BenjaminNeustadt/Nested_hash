@@ -64,8 +64,17 @@ class Row
   # def outermost_key_for(data)
   #   data.self.device_type
   # end
-  def outermost_key(data)
+  # Creating hashes if they dont exist
+  def device_type_key(data)
     data[self.device_type] ||= {}
+  end
+
+  def manufacturer_key(data)
+    data[self.device_type][self.manufacturer] ||= {}
+  end
+
+  def model_hardware_version_key(data)
+    data[self.device_type][self.manufacturer][self.model_hardware_version] ||= {}
   end
 
 end
@@ -82,13 +91,16 @@ def data_parse(csv_file)
     # HASH KEYS
 
     #data[row_object.device_type] ||= {}
-    row_object.outermost_key(data)
-    puts data
-    data[row_object.device_type][row_object.manufacturer] ||= {}
-    puts data
-    data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version] ||= {}
+    row_object.device_type_key(data)
+    #puts data
+    row_object.manufacturer_key(data)
+    #data[row_object.device_type][row_object.manufacturer] ||= {}
+    #puts data
+    #data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version] ||= {}
+    row_object.model_hardware_version_key(data)
 
-    if data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].length > 0
+    if row_object.model_hardware_version_key(data).length > 0
+    #if data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].length > 0
 
       # Must transform the previous firmware hash into the new hash format
       data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][row_object.firmware_version] ||= {
