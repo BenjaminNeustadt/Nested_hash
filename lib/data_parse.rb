@@ -77,6 +77,42 @@ class Row
     data[self.device_type][self.manufacturer][self.model_hardware_version] ||= {}
   end
 
+  def firmware_key_value_create_hash(data) 
+    # Must transform the previous firmware hash into the new hash format
+
+    data[self.device_type][self.manufacturer][self.model_hardware_version][self.firmware_version] ||= {
+      data[self.device_type][self.manufacturer][self.model_hardware_version][:gbcs_version] => {
+        smets_chts_version: data[self.device_type][self.manufacturer][self.model_hardware_version][:smets_chts_version],
+        image_hash: data[self.device_type][self.manufacturer][self.model_hardware_version][:image_hash]
+      }
+    }
+
+    inner_hash = {
+      self.gbcs_version => {
+        smets_chts_version: self.smets_chts_version,
+        image_hash: self.image_hash
+      }
+    }
+
+    data[self.device_type][self.manufacturer][self.model_hardware_version][self.firmware_version].merge!(inner_hash)
+    
+    data[self.device_type][self.manufacturer][self.model_hardware_version].delete_if{|k,v| k.is_a?(Symbol)}
+
+  end
+
+  def innermost_standard(data)
+
+      inner_hash = {
+          firmware_version: self.firmware_version,                          
+          smets_chts_version: self.smets_chts_version, 
+          gbcs_version: self.gbcs_version,              
+          image_hash: self.image_hash
+      }
+
+      data[self.device_type][self.manufacturer][self.model_hardware_version] = inner_hash
+
+  end
+
 end
 
 def data_parse(csv_file)
@@ -103,40 +139,42 @@ def data_parse(csv_file)
     #if data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].length > 0
 
       # Must transform the previous firmware hash into the new hash format
-      data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][row_object.firmware_version] ||= {
-        data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:gbcs_version] => {
-          smets_chts_version: data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:smets_chts_version],
-          image_hash: data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:image_hash]
-        }
-      }
-      # Then we take the current row and create the inner hash.
-      inner_hash = {
-        row_object.gbcs_version => {
-          smets_chts_version: row_object.smets_chts_version,
-          image_hash: row_object.image_hash
-        }
-      }
-      # This will merge the previous and the current hash into the firmware_version hash so we end up with an array of hashes
-      data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][row_object.firmware_version].merge!(inner_hash)
-      # Then we need to delete the previous keys that were saved on the first row since they are now nested under the key 'firmware_version'
-      puts data if $INFO
+      #row_object.firmware_key(data) ||= {
+      row_object.firmware_key_value_create_hash(data)
+      # data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][row_object.firmware_version] ||= {
+      #   data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:gbcs_version] => {
+      #     smets_chts_version: data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:smets_chts_version],
+      #     image_hash: data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:image_hash]
+      #   }
+      # }
+      # # Then we take the current row and create the inner hash.
+      # inner_hash = {
+      #   row_object.gbcs_version => {
+      #     smets_chts_version: row_object.smets_chts_version,
+      #     image_hash: row_object.image_hash
+      #   }
+      # }
+      # # This will merge the previous and the current hash into the firmware_version hash so we end up with an array of hashes
+      # data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][row_object.firmware_version].merge!(inner_hash)
+      # # Then we need to delete the previous keys that were saved on the first row since they are now nested under the key 'firmware_version'
+      # puts data if $INFO
       
-      data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].delete_if{|k,v| k.is_a?(Symbol)}
+      # data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].delete_if{|k,v| k.is_a?(Symbol)}
       
-      puts data if $INFO
+      # puts data if $INFO
 
     else
+        row_object.innermost_standard(data)
+    #   inner_hash = {
+    #       firmware_version: row_object.firmware_version,                          
+    #       smets_chts_version: row_object.smets_chts_version, 
+    #       gbcs_version: row_object.gbcs_version,              
+    #       image_hash: row_object.image_hash
+    #   }
 
-      inner_hash = {
-          firmware_version: row_object.firmware_version,                          
-          smets_chts_version: row_object.smets_chts_version, 
-          gbcs_version: row_object.gbcs_version,              
-          image_hash: row_object.image_hash
-      }
+    #   data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version] = inner_hash
 
-      data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version] = inner_hash
-
-      end
+       end
     end
   end
   return data
