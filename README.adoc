@@ -68,13 +68,13 @@ bundle install
 rspec -fd
 ----
 
-- Run the script:
+- Run the script by typing in the csv file as a first argument, and the source.rb file as the second argument:
 
 ----
-bin/csv-to-hash
-----
+bin/csv-to-hash source.csv destination.rb
 
-* The file is currently informed inside the executable file in bin/
+# EG bin/csv-to-hash Central-Products-Lis.csv destination.rb
+----
 
 == Testing
 
@@ -84,12 +84,9 @@ Simplcov is used to check for code coverage.
 
 == Approach
 
-The different classes are currently all inside one file to facilitate reading.
-
 === Notes
 
-.My preliminary understanding was that it shuold look something like this
-.Should look something like this:
+.My preliminary understanding was that it should look something like this
 [source, rb]
 ----
   {
