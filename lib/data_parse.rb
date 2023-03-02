@@ -74,7 +74,7 @@ class Row
     data[self.device_type][self.manufacturer][self.model_hardware_version] ||= {}
   end
 
-  def firmware_key_value_create_hash(data) 
+  def inner_hash
 
     inner_hash = {
       firmware_version: self.firmware_version,                          
@@ -83,6 +83,9 @@ class Row
       image_hash: self.image_hash
     }
 
+  end
+
+  def build_array_for_inner_hashes(data) 
 ##  We check if the value is already an array and append to it if so.
 
     if data[self.device_type][self.manufacturer][self.model_hardware_version].is_a?(Array)
@@ -96,15 +99,14 @@ class Row
 
   def innermost_standard(data)
 
-    inner_hash = {
-      firmware_version: self.firmware_version,                          
-      smets_chts_version: self.smets_chts_version, 
-      gbcs_version: self.gbcs_version,              
-      image_hash: self.image_hash
-    }
-
     data[self.device_type][self.manufacturer][self.model_hardware_version] = inner_hash
 
+  end
+
+  def create_hash_structures(data)
+      self.device_type_key(data)
+      self.manufacturer_key(data)
+      self.model_hardware_version_key(data)
   end
 
 end
@@ -119,14 +121,11 @@ def data_parse(csv_file)
       row_object = Row.new(row)
 
 ## HASH KEYS if they dont exits, abstracted to the Row class, since we are iterating on a ROW
-      row_object.device_type_key(data)
-      row_object.manufacturer_key(data)
-      row_object.model_hardware_version_key(data)
-
+      row_object.create_hash_structures(data)
+      
       if row_object.model_hardware_version_key(data).length > 0
 
-         row_object.firmware_key_value_create_hash(data)
-
+         row_object.build_array_for_inner_hashes(data)
 
       else
          row_object.innermost_standard(data)
