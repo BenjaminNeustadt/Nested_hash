@@ -1,0 +1,5 @@
+# test coverage
+coverage/
+
+# file for testing live data
+test_2.csv
