@@ -394,4 +394,6 @@ RSpec.describe '#data_parse' do
     actual = data_parse(input_csv)
     expect(actual).to eq expected
   end
+
 end
+

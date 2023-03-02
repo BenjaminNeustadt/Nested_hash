@@ -61,10 +61,7 @@ class Row
     row[INNER_HASH_VALUES[:image_hash]]
   end
 
-  # def outermost_key_for(data)
-  #   data.self.device_type
-  # end
-  # Creating hashes if they dont exist
+## Creating hashes if they dont exist
   def device_type_key(data)
     data[self.device_type] ||= {}
   end
@@ -78,7 +75,8 @@ class Row
   end
 
   def firmware_key_value_create_hash(data) 
-    # Must transform the previous firmware hash into the new hash format
+
+## Must transform the previous firmware hash into the new hash format
 
     data[self.device_type][self.manufacturer][self.model_hardware_version][self.firmware_version] ||= {
       data[self.device_type][self.manufacturer][self.model_hardware_version][:gbcs_version] => {
@@ -87,6 +85,7 @@ class Row
       }
     }
 
+## Then we take the current row and create the inner hash.
     inner_hash = {
       self.gbcs_version => {
         smets_chts_version: self.smets_chts_version,
@@ -94,22 +93,24 @@ class Row
       }
     }
 
+ ## This will merge the previous and the current hash into the firmware_version hash so we end up with an array of hashes
     data[self.device_type][self.manufacturer][self.model_hardware_version][self.firmware_version].merge!(inner_hash)
     
+## Then we need to delete the previous keys that were saved on the first row since they are now nested under the key 'firmware_version'
     data[self.device_type][self.manufacturer][self.model_hardware_version].delete_if{|k,v| k.is_a?(Symbol)}
 
   end
 
   def innermost_standard(data)
 
-      inner_hash = {
-          firmware_version: self.firmware_version,                          
-          smets_chts_version: self.smets_chts_version, 
-          gbcs_version: self.gbcs_version,              
-          image_hash: self.image_hash
-      }
+    inner_hash = {
+      firmware_version: self.firmware_version,                          
+      smets_chts_version: self.smets_chts_version, 
+      gbcs_version: self.gbcs_version,              
+      image_hash: self.image_hash
+    }
 
-      data[self.device_type][self.manufacturer][self.model_hardware_version] = inner_hash
+    data[self.device_type][self.manufacturer][self.model_hardware_version] = inner_hash
 
   end
 
@@ -124,100 +125,24 @@ def data_parse(csv_file)
 
       row_object = Row.new(row)
 
-    # HASH KEYS
+  ## HASH KEYS if they dont exits, abstracted to the Row class, since we are iterating on a ROW
+      row_object.device_type_key(data)
+      row_object.manufacturer_key(data)
+      row_object.model_hardware_version_key(data)
 
-    #data[row_object.device_type] ||= {}
-    row_object.device_type_key(data)
-    #puts data
-    row_object.manufacturer_key(data)
-    #data[row_object.device_type][row_object.manufacturer] ||= {}
-    #puts data
-    #data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version] ||= {}
-    row_object.model_hardware_version_key(data)
+      if row_object.model_hardware_version_key(data).length > 0
+  ## Must transform the previous firmware hash into the new hash format
+         row_object.firmware_key_value_create_hash(data)
 
-    if row_object.model_hardware_version_key(data).length > 0
-    #if data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].length > 0
+         #then you ccan chack with another conditional here
+         # and return the same logic as above
 
-      # Must transform the previous firmware hash into the new hash format
-      #row_object.firmware_key(data) ||= {
-      row_object.firmware_key_value_create_hash(data)
-      # data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][row_object.firmware_version] ||= {
-      #   data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:gbcs_version] => {
-      #     smets_chts_version: data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:smets_chts_version],
-      #     image_hash: data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][:image_hash]
-      #   }
-      # }
-      # # Then we take the current row and create the inner hash.
-      # inner_hash = {
-      #   row_object.gbcs_version => {
-      #     smets_chts_version: row_object.smets_chts_version,
-      #     image_hash: row_object.image_hash
-      #   }
-      # }
-      # # This will merge the previous and the current hash into the firmware_version hash so we end up with an array of hashes
-      # data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version][row_object.firmware_version].merge!(inner_hash)
-      # # Then we need to delete the previous keys that were saved on the first row since they are now nested under the key 'firmware_version'
-      # puts data if $INFO
-      
-      # data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].delete_if{|k,v| k.is_a?(Symbol)}
-      
-      # puts data if $INFO
-
-    else
-        row_object.innermost_standard(data)
-    #   inner_hash = {
-    #       firmware_version: row_object.firmware_version,                          
-    #       smets_chts_version: row_object.smets_chts_version, 
-    #       gbcs_version: row_object.gbcs_version,              
-    #       image_hash: row_object.image_hash
-    #   }
-
-    #   data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version] = inner_hash
-
-       end
+  # puts data if $INFO
+      else
+         row_object.innermost_standard(data)
+      end
     end
   end
-  return data
+## We use implicit return, I might prefer to put the explicit return, but the code is now cleaner so it's ok
+  data
 end
-
-=begin
-
-_END_
-==NOTES
-    data[device_type][manufacturer][model_hardware_version] ||= {}
-
-    inner_hash = 
-    {
-            firmware_version: row["Device_Model.firmware_version"],                          # J (Device_Model.firmware_version)
-            smets_chts_version: row["SMETS_CHTS Version.Version_number_and_effective_date"], # K (SMETS_CHTS Version.Version_number_and_effective_date)
-            gbcs_version: row["GBCS Version.version_number"],                                # L (GBCS Version.version_number)
-            image_hash: row["Manufacturer_Image.hash"]                                       # M (Manufacturer_Image.hash)
-    }
-
-   OUTER_HASH_VALUES = [
-     {device_type: "Device_Type.name"},
-     {manufacturer: "Device_Model.manufacturer_identifier" },
-     {model_hardware_version: "Device_Model.model_identifier_concatenated_with_hardware_version"}
-   ]
-
-   # INNER HASH
-   INNER_HASH_VALUES = [
-     {firmware_version: "Device_Model.firmware_version"},
-     {smets_chts_version: "SMETS_CHTS Version.Version_number_and_effective_date"},
-     {gbcs_version: "GBCS Version.version_number"},
-     {image_hash: "Manufacturer_Image.hash"}
-   ]
-       
-def retrieve_data_values(row)
-  OUTER_HASH_VALUES.each do |key, value|
-    key = row[value]
-  @firmware_version = row["Device_Model.firmware_version"]
-  @smets_chts_version = row["SMETS_CHTS Version.Version_number_and_effective_date"]
-  @gbcs_version = row["GBCS Version.version_number"]
-  @image_hash = row["Manufacturer_Image.hash"]
-  @device_type = row["Device_Type.name"]
-  @manufacturer = row["Device_Model.manufacturer_identifier"]
-  @model_hardware_version = row["Device_Model.model_identifier_concatenated_with_hardware_version"]
-  end
-end
-=end

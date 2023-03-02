@@ -42,6 +42,208 @@ except those marked "Removed" in *column C*, which must be excluded.
 Add comments to explain your solution and why you believe it is optimal
 
 
+== Usage
+
+The script is currently only fit to be used by Octopus team, but the logic of checking whether a key is already existant can be adopted on other projects.
+To use the script with the example file (the only file currently working for it)
+
+
+== Testing
+
+I used Rspec following BDD.
+I used Simplcov to check for code coverage.
+
+== Approach
+
+
+
+
+When we got to the last hash, what I started doing was dropping the incoming key and turning its value into a key instead like this:
+
+[source, rb]
+----
+    expected = {
+     'Type_Communications' => {
+       'Mfg_1' => {
+         '1.1.0' => {
+           '1a.1.1' => {
+             "GBCS Version 1" => {
+               :smets_chts_version => 'CHTS V1',
+               :image_hash => 'image1hash'
+             },
+             "GBCS Version 1a" => {
+               :smets_chts_version => "CHTS V1a",
+               :image_hash => "image1Ahash"
+             },
+             "GBCS Version 1b" => {
+               :smets_chts_version => 'CHTS V1b',
+               :image_hash => 'image1Ahash'
+             },
+             "GBCS Version 1c" => {
+              :smets_chts_version => 'CHTS V1b',
+              :image_hash => 'image1Ahash'
+            }
+           }
+         }
+       }
+     }
+   }
+----
+
+But then I saw the requirement again: "The corresponding values at the innermost level are each a hash composed as"
+
+I felt I went a step too far in doing this, and it didn't properly respect the brief.
+So I decided to take a second approach instead. The innermost hash should never be changed and always retain the key value relationship already in place,
+so the best way to do this is if the Column I value is already in use, then that key will become the key for an array containing the different instances of the inner hash:
+
+Regardless of what "firmware":
+
+[source, rb]
+----
+
+expected = {
+  'Type_Communications' => {            
+    'Mfg_1' => {                        
+      '1.1.0' =>  [
+        {# If this is already in use                     
+          firmware_version: '1.1.1',      
+          smets_chts_version: 'CHTS V1',  
+          gbcs_version: 'GBCS Version 1', 
+          image_hash: 'image1hash'        
+        },
+        {  # And this one will be identical
+          :firmware_version => "1a.1.1",
+          :gbcs_version => "GBCS Version 1a",
+          :smets_chts_version => "CHTS V1a",
+          :image_hash => "image1Ahash"
+        }
+      ]
+    }
+  }
+}
+----
+
+The benefit of this is that if at some stage we get to the last inner value, we will have to store the image_hash in an array, and it will now be truncated from it's original "shape"
+so it is easier to retain the shape of the inner hash now, and if we need to perform a comparison on any of the inner hash we can so iteratively using the array.
+
+
+I noticed this when I got to this test:
+
+
+[source, rb]
+----
+
+  it 'It groups with duplicate headers/keys for "fifth inner-key" - 2 values' do
+
+    input_csv =
+    <<~CSV
+      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1,GBCS Version 1,image1hash
+      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1a.1.1,CHTS V1a,GBCS Version 1,image1Ahash
+    CSV
+
+    expected = {
+     'Type_Communications' => {
+       'Mfg_1' => {
+         '1.1.0' => {
+           '1a.1.1' => {
+             "GBCS Version 1" => {
+              "CHTS V1" => {
+               :image_hash => 'image1hash'
+              },
+             {
+              "CHTS V1a" => {
+               :image_hash => "image1Ahash"
+              }
+            }
+          }
+         }
+       }
+     }
+     }
+    }
+ 
+    actual = data_parse(input_csv)
+    expect(actual).to eq expected
+  end
+
+# If the 'gbcs' version is already in use for an incoming hash, then we will have to store the image in some kind of array,
+# something like this:
+
+
+----
+
+.Thoughts on the end:
+[source, ruby]
+----
+   The question is what is better to store the last value. we know that if this happens, it will only happen once, so speed at this stage is maybe not an issue.
+   though they have specified a nest hash. so, that can mean, 
+   # Thoughts on ending:
+   # Ending
+
+## OPTION 1
+    expected = {
+     'Type_Communications' => {
+       'Mfg_1' => {
+         '1.1.0' => {
+           '1a.1.1' => {
+             "GBCS Version 1" => {
+              'CHTS V1' =>[{
+               :image_hash => 'image1hash'
+              },
+              {
+               :image_hash => "image2Ahash"
+             }]
+              }
+             }
+           }
+         }
+       }
+     }
+   }
+
+## OPTION 2
+# An index does this for free though
+    expected = {
+     'Type_Communications' => {
+       'Mfg_1' => {
+         '1.1.0' => {
+           '1a.1.1' => {
+             "GBCS Version 1" => {
+              'CHTS V1' => {
+                0 => 'image1hash',
+                1 => "image2Ahash"
+              }
+              }
+             }
+           }
+         }
+       }
+     }
+   }
+
+## OPTION 3
+
+    expected = {
+     'Type_Communications' => {
+       'Mfg_1' => {
+         '1.1.0' => {
+           '1a.1.1' => {
+             "GBCS Version 1" => {
+              'CHTS V1' =>[
+              'image1hash',
+              "image2Ahash"
+             ]
+              }
+             }
+           }
+         }
+       }
+     }
+   }
+----
+
+== Limitations
 
 == Notes
 
@@ -60,4 +262,45 @@ Add comments to explain your solution and why you believe it is optimal
       }
     }
   }
+----
+
+== To do
+
+----
+parse this_file.csv => writes the file for you 
+executable 
+
+file.write
+  csv.write
+  data_parse this_file.csv
+
+  .............................
+
+===>
+data_parse)this_file.csv)
+
+done.
+
+$> bin/csv_to_hash -o /tmp/report.txt /tmp/IOT_Hardware.csv
+Working
+Working
+Working
+$> ls /tmp/IOT_Hardware.csv
+some listing of this file.
+$> cat /tmp/IOT_Hardware.csv
+
+
+ls ./bin/csv_to_hash
+
+#!/usr/bin/env ruby
+
+# library like Thor or some other gem, but those gems will likely use OptParse or OptionParser `getoptlong`
+`optionparser`
+`optparse`
+
+
+
+bundle add Thor or optparse
+
+dataparse this_file.csv <=======================
 ----
