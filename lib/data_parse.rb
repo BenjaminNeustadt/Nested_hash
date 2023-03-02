@@ -61,8 +61,11 @@ class Row
     row[INNER_HASH_VALUES[:image_hash]]
   end
 
-  def outermost_key_for(data)
-    data.self.device_type
+  # def outermost_key_for(data)
+  #   data.self.device_type
+  # end
+  def outermost_key(data)
+    data[self.device_type] ||= {}
   end
 
 end
@@ -78,11 +81,11 @@ def data_parse(csv_file)
 
     # HASH KEYS
 
-    #outermost_key_for(data) ||= {}
-    data[row_object.device_type] ||= {}
-
+    #data[row_object.device_type] ||= {}
+    row_object.outermost_key(data)
+    puts data
     data[row_object.device_type][row_object.manufacturer] ||= {}
-
+    puts data
     data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version] ||= {}
 
     if data[row_object.device_type][row_object.manufacturer][row_object.model_hardware_version].length > 0
