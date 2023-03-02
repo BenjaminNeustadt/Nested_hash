@@ -2,7 +2,7 @@ require 'csv'
 
 $INFO = false
 
-class Row
+module CSVHeaders 
 
   OUTER_HASH_VALUES =  {
 
@@ -20,6 +20,11 @@ class Row
     image_hash:               "Manufacturer_Image.hash"
 
   }
+
+end
+
+class Row
+  include CSVHeaders
 
   def initialize(row)
     @row = row
@@ -56,6 +61,10 @@ class Row
     row[INNER_HASH_VALUES[:image_hash]]
   end
 
+  def outermost_key_for(data)
+    data.self.device_type
+  end
+
 end
 
 def data_parse(csv_file)
@@ -69,6 +78,7 @@ def data_parse(csv_file)
 
     # HASH KEYS
 
+    #outermost_key_for(data) ||= {}
     data[row_object.device_type] ||= {}
 
     data[row_object.device_type][row_object.manufacturer] ||= {}
