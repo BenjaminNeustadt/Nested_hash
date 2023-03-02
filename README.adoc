@@ -23,9 +23,9 @@ Hash where:
 -  the next outermost are the corresponding values for *column I* (Device_Model.model_identifier_concatenated_with_hardware_version)
 
 The corresponding values at the innermost level are each a hash composed as:
-[source]
+
+[source, txt]
 ----
-# pseudo code
 
 {
 
@@ -47,19 +47,102 @@ Add comments to explain your solution and why you believe it is optimal
 The script is currently only fit to be used by Octopus team, but the logic of checking whether a key is already existant can be adopted on other projects.
 To use the script with the example file (the only file currently working for it)
 
+Steps:
+
+- git clone this repo:
+
+[source, ruby]
+----
+git clone [repo]
+----
+
+- Install dependencies:
+
+----
+bundle install
+----
+
+- Run the specs:
+
+----
+rspec -fd
+----
 
 == Testing
 
-I used Rspec following BDD.
-I used Simplcov to check for code coverage.
+The testing suite used is Rspec.
+The process followed was BDD.
+Simplcov is used to check for code coverage.
 
 == Approach
 
+== Notes
 
+.My preliminary understanding was that it shuold look something like this
+.Should look something like this:
+[source, rb]
+----
+  {
+    "Column D value"=>{
+      "Column E value"=>{
+        "Column I value"=>{
+          :firmware_version=>    "Column J value",
+          :smets_chts_version=>  "Column K value",
+          :gbcs_version=>        "Column L value",
+          :image_hash=>          "Column M value"
+        }
+      }
+    }
+  }
+----
 
+I was uncertain whether it was "valid" to use an array to store the inner hashes. Since the brief only made mention of a nested array.
+For the inner hashes, I therefore took an approach that checked whether the key was already in use, and if so turned the value on the firmware key into the key of the remaining key/value pairs of the inner hash.
+This way we would not lose any of the data, and we would still habe the speed of the hash table.
 
-When we got to the last hash, what I started doing was dropping the incoming key and turning its value into a key instead like this:
+However, I then realised that as we got to the last value on the inner hash, we would either have to create a key for it using an index number (but we get that for free with arrays),
+or make it a value inside an array anyway. (I have left some examples of what I mean at the end of the file).
 
+I felt the optimal thing to do was to place it inside an array early on, as we still dont lose any data. 
+We can still leverage the speed of hash look up, only up to a certain point.
+
+The benefit of this is that if at some stage we get to the last inner value, we will have to store the image_hash in an array, and it will now be truncated from it's original "shape"
+so it is easier to retain the shape of the inner hash now, and if we need to perform a comparison on any of the inner hash we can so iteratively using the array.
+
+I therefore chose to focus on this line: 
+"The corresponding values at the innermost level are each a hash composed as""
+I decided to take a second approach instead.
+The innermost hash should never be changed and always retain the key value relationship already in place.
+
+If Column I value is already in use, then that key will become the key for an array containing the different instances of the inner hash.
+
+.Like this
+[source, rb]
+----
+
+expected = {
+  'Type_Communications' => {            
+    'Mfg_1' => {                        
+      '1.1.0' =>  [
+        {# If this is already in use                     
+          firmware_version: '1.1.1',      
+          smets_chts_version: 'CHTS V1',  
+          gbcs_version: 'GBCS Version 1', 
+          image_hash: 'image1hash'        
+        },
+        {  # And this one will be identical
+          :firmware_version => "1a.1.1",
+          :gbcs_version => "GBCS Version 1a",
+          :smets_chts_version => "CHTS V1a",
+          :image_hash => "image1Ahash"
+        }
+      ]
+    }
+  }
+}
+----
+
+.Example of what we can do if we make the value the key for first inner-most hash
 [source, rb]
 ----
     expected = {
@@ -90,44 +173,7 @@ When we got to the last hash, what I started doing was dropping the incoming key
    }
 ----
 
-But then I saw the requirement again: "The corresponding values at the innermost level are each a hash composed as"
-
-I felt I went a step too far in doing this, and it didn't properly respect the brief.
-So I decided to take a second approach instead. The innermost hash should never be changed and always retain the key value relationship already in place,
-so the best way to do this is if the Column I value is already in use, then that key will become the key for an array containing the different instances of the inner hash:
-
-Regardless of what "firmware":
-
-[source, rb]
-----
-
-expected = {
-  'Type_Communications' => {            
-    'Mfg_1' => {                        
-      '1.1.0' =>  [
-        {# If this is already in use                     
-          firmware_version: '1.1.1',      
-          smets_chts_version: 'CHTS V1',  
-          gbcs_version: 'GBCS Version 1', 
-          image_hash: 'image1hash'        
-        },
-        {  # And this one will be identical
-          :firmware_version => "1a.1.1",
-          :gbcs_version => "GBCS Version 1a",
-          :smets_chts_version => "CHTS V1a",
-          :image_hash => "image1Ahash"
-        }
-      ]
-    }
-  }
-}
-----
-
-The benefit of this is that if at some stage we get to the last inner value, we will have to store the image_hash in an array, and it will now be truncated from it's original "shape"
-so it is easier to retain the shape of the inner hash now, and if we need to perform a comparison on any of the inner hash we can so iteratively using the array.
-
-
-I noticed this when I got to this test:
+I noticed the array this when I got to this test:
 
 
 [source, rb]
@@ -168,20 +214,17 @@ I noticed this when I got to this test:
   end
 
 # If the 'gbcs' version is already in use for an incoming hash, then we will have to store the image in some kind of array,
-# something like this:
-
-
 ----
 
 .Thoughts on the end:
 [source, ruby]
 ----
-   The question is what is better to store the last value. we know that if this happens, it will only happen once, so speed at this stage is maybe not an issue.
-   though they have specified a nest hash. so, that can mean, 
-   # Thoughts on ending:
-   # Ending
+# The question is what is better to store the last value. we know that if this happens, it will only happen once, so speed at this stage is maybe not an issue.
+# though they have specified a nest hash. so, that can mean, 
+# Thoughts on ending:
 
 ## OPTION 1
+
     expected = {
      'Type_Communications' => {
        'Mfg_1' => {
@@ -241,66 +284,4 @@ I noticed this when I got to this test:
        }
      }
    }
-----
-
-== Limitations
-
-== Notes
-
-.Should look something like this:
-[source, rb]
-----
-  {
-    "Column D value"=>{
-      "Column E value"=>{
-        "Column I value"=>{
-          :firmware_version=>    "Column J value",
-          :smets_chts_version=>  "Column K value",
-          :gbcs_version=>        "Column L value",
-          :image_hash=>          "Column M value"
-        }
-      }
-    }
-  }
-----
-
-== To do
-
-----
-parse this_file.csv => writes the file for you 
-executable 
-
-file.write
-  csv.write
-  data_parse this_file.csv
-
-  .............................
-
-===>
-data_parse)this_file.csv)
-
-done.
-
-$> bin/csv_to_hash -o /tmp/report.txt /tmp/IOT_Hardware.csv
-Working
-Working
-Working
-$> ls /tmp/IOT_Hardware.csv
-some listing of this file.
-$> cat /tmp/IOT_Hardware.csv
-
-
-ls ./bin/csv_to_hash
-
-#!/usr/bin/env ruby
-
-# library like Thor or some other gem, but those gems will likely use OptParse or OptionParser `getoptlong`
-`optionparser`
-`optparse`
-
-
-
-bundle add Thor or optparse
-
-dataparse this_file.csv <=======================
 ----
