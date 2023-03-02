@@ -105,7 +105,7 @@ Simplcov is used to check for code coverage.
 
 I was uncertain whether it was "valid" to use an array to store the inner hashes. Since the brief only made mention of a nested array.
 For the inner hashes, I therefore took an approach that checked whether the key was already in use, and if so turned the value on the firmware key into the key of the remaining key/value pairs of the inner hash.
-This way we would not lose any of the data, and we would still habe the speed of the hash table.
+This way we would not lose any of the data, and we would still have the speed of the hash table.
 
 However, I then realised that as we got to the last value on the inner hash, we would either have to create a key for it using an index number (but we get that for free with arrays),
 or make it a value inside an array anyway. (I have left some examples of what I mean at the end of the file).
@@ -114,7 +114,7 @@ I felt the optimal thing to do was to place it inside an array early on, as we s
 We can still leverage the speed of hash look up, only up to a certain point.
 
 The benefit of this is that if at some stage we get to the last inner value, we will have to store the image_hash in an array, and it will now be truncated from it's original "shape"
-so it is easier to retain the shape of the inner hash now, and if we need to perform a comparison on any of the inner hash we can so iteratively using the array.
+so it is easier to retain the shape of the inner hash now, and if we need to perform a comparison on any of the inner hash we can do so iteratively using the array.
 
 I therefore chose to focus on this line: 
 "The corresponding values at the innermost level are each a hash composed as""
@@ -180,9 +180,7 @@ expected = {
    }
 ----
 
-I noticed the array this when I got to this test:
-
-
+.I noticed it would need the array anyway when I got to this test:
 [source, rb]
 ----
 
