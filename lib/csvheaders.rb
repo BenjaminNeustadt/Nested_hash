@@ -1,4 +1,4 @@
-module CSVHeaders 
+module CSVHeaders
 
   OUTER_HASH_VALUES =  {
 

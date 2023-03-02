@@ -53,15 +53,15 @@ class Row
   def inner_hash
 
     inner_hash = {
-      firmware_version: self.firmware_version,                          
-      smets_chts_version: self.smets_chts_version, 
-      gbcs_version: self.gbcs_version,              
+      firmware_version: self.firmware_version,
+      smets_chts_version: self.smets_chts_version,
+      gbcs_version: self.gbcs_version,
       image_hash: self.image_hash
     }
 
   end
 
-  def build_array_for_inner_hashes(data) 
+  def build_array_for_inner_hashes(data)
 
 ##  We check if the value is already an array and append to it if so.
     if data[self.device_type][self.manufacturer][self.model_hardware_version].is_a?(Array)
