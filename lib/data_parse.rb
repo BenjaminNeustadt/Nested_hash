@@ -1,6 +1,6 @@
 require 'csv'
 
-$INFO = false
+$INFO = true
 
 module CSVHeaders 
 
@@ -76,28 +76,21 @@ class Row
 
   def firmware_key_value_create_hash(data) 
 
-## Must transform the previous firmware hash into the new hash format
-
-    data[self.device_type][self.manufacturer][self.model_hardware_version][self.firmware_version] ||= {
-      data[self.device_type][self.manufacturer][self.model_hardware_version][:gbcs_version] => {
-        smets_chts_version: data[self.device_type][self.manufacturer][self.model_hardware_version][:smets_chts_version],
-        image_hash: data[self.device_type][self.manufacturer][self.model_hardware_version][:image_hash]
-      }
-    }
-
-## Then we take the current row and create the inner hash.
     inner_hash = {
-      self.gbcs_version => {
-        smets_chts_version: self.smets_chts_version,
-        image_hash: self.image_hash
-      }
+      firmware_version: self.firmware_version,                          
+      smets_chts_version: self.smets_chts_version, 
+      gbcs_version: self.gbcs_version,              
+      image_hash: self.image_hash
     }
 
- ## This will merge the previous and the current hash into the firmware_version hash so we end up with an array of hashes
-    data[self.device_type][self.manufacturer][self.model_hardware_version][self.firmware_version].merge!(inner_hash)
-    
-## Then we need to delete the previous keys that were saved on the first row since they are now nested under the key 'firmware_version'
-    data[self.device_type][self.manufacturer][self.model_hardware_version].delete_if{|k,v| k.is_a?(Symbol)}
+##  We check if the value is already an array and append to it if so.
+
+    if data[self.device_type][self.manufacturer][self.model_hardware_version].is_a?(Array)
+      data[self.device_type][self.manufacturer][self.model_hardware_version] << inner_hash
+    else
+##      # otherwise we create a new hash
+      data[self.device_type][self.manufacturer][self.model_hardware_version] = [data[self.device_type][self.manufacturer][self.model_hardware_version], inner_hash]
+    end
 
   end
 
@@ -125,24 +118,20 @@ def data_parse(csv_file)
 
       row_object = Row.new(row)
 
-  ## HASH KEYS if they dont exits, abstracted to the Row class, since we are iterating on a ROW
+## HASH KEYS if they dont exits, abstracted to the Row class, since we are iterating on a ROW
       row_object.device_type_key(data)
       row_object.manufacturer_key(data)
       row_object.model_hardware_version_key(data)
 
       if row_object.model_hardware_version_key(data).length > 0
-  ## Must transform the previous firmware hash into the new hash format
+
          row_object.firmware_key_value_create_hash(data)
 
-         #then you ccan chack with another conditional here
-         # and return the same logic as above
 
-  # puts data if $INFO
       else
          row_object.innermost_standard(data)
       end
     end
   end
-## We use implicit return, I might prefer to put the explicit return, but the code is now cleaner so it's ok
   data
 end
