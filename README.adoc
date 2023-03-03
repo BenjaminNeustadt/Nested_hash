@@ -12,6 +12,8 @@ Benjamin b.james.neustadt@gmail.com
 :source-highlighter: highlight.js
 :highlightjsdir: ./highlight
 //URLs
+:url-hash-speed: https://stackoverflow.com/questions/12020984/hash-table-why-is-it-faster-than-arrays
+
 
 == Brief
 
@@ -44,8 +46,7 @@ Add comments to explain your solution and why you believe it is optimal
 
 == Usage
 
-The script is currently only fit to be used by Octopus team, but the logic of checking whether a key is already existant can be adopted on other projects.
-To use the script with the example file (the only file currently working for it)
+The script turns the data in the Central-Products-Lis.csv file into a hash. To use the script run the command followed by the desired path/source file, and then followed by the destination file (i.e source.rb).
 
 Steps:
 
@@ -68,13 +69,15 @@ bundle install
 rspec -fd
 ----
 
-- Run the script by typing in the csv file as a first argument, and the source.rb file as the second argument:
+- Run the script by typing in the csv file and path as first argument, and the destination path as second argument:
+
 
 ----
-bin/csv-to-hash source.csv destination.rb
-
-# EG bin/csv-to-hash Central-Products-Lis.csv destination.rb
+bin/csv-to-hash Central-Products-Lis.csv destination.rb
 ----
+
+.Other csv files that have the same Headers content structure as the one provided can be run like this:
+EG: `bin/csv-to-hash source.csv destination.rb` OR `bin/csv-to-hash somewhere/source.csv somewhere_else/destination.rb`
 
 == Testing
 
@@ -83,6 +86,10 @@ The process followed was BDD.
 Simplcov is used to check for code coverage.
 
 == Approach
+
+The strategy that I used was based on the fact that when we try to append a hash to a nested hash,
+if any keys coincide then the original hash will be overwritten with the incoming one.
+We therefore come up with a strategy to ensure that the data is not lost and overwritten when storing new data that may already be referred to by the same key.
 
 === Notes
 
@@ -104,8 +111,8 @@ Simplcov is used to check for code coverage.
 ----
 
 I was uncertain whether it was "valid" to use an array to store the inner hashes. Since the brief only made mention of a nested array.
-For the inner hashes, I therefore took an approach that checked whether the key was already in use, and if so turned the value on the firmware key into the key of the remaining key/value pairs of the inner hash.
-This way we would not lose any of the data, and we would still have the speed of the hash table.
+For the inner hashes, I therefore took an approach that checked whether the key was already in use by and if so swictched the value on the firmware key to be the key of the remaining key/value pairs of the same inner hash.
+This way we would not lose any of the data, and we would still have the speed of the {url-hash-speed}[hash table].
 
 However, I then realised that as we got to the last value on the inner hash, we would either have to create a key for it using an index number (but we get that for free with arrays),
 or make it a value inside an array anyway. (I have left some examples of what I mean at the end of the file).
@@ -113,15 +120,14 @@ or make it a value inside an array anyway. (I have left some examples of what I 
 I felt the optimal thing to do was to place it inside an array early on, as we still dont lose any data. 
 We can still leverage the speed of hash look up, only up to a certain point.
 
-The benefit of this is that if at some stage we get to the last inner value, we will have to store the image_hash in an array, and it will now be truncated from it's original "shape"
-so it is easier to retain the shape of the inner hash now, and if we need to perform a comparison on any of the inner hash we can do so iteratively using the array.
+The benefit of this is that if at some stage we get to the last inner value, we will have to store the image_hash in an array, and it will now be truncated from it's original "shape" anyway.
+So it is easier to retain the shape of the inner hash now, and if we need to perform a comparison on any of the inner hash we can do so iteratively using the array.
 
-I therefore chose to focus on this line: 
-"The corresponding values at the innermost level are each a hash composed as""
-I decided to take a second approach instead.
-The innermost hash should never be changed and always retain the key value relationship already in place.
+I therefore chose to focus on this line in the requirement: 
+"The corresponding values at the innermost level are each a hash composed as [...]"
+Taking this second approach the innermost hash should never be changed and always retain the key value relationship already in place.
 
-If Column I value is already in use, then that key will become the key for an array containing the different instances of the inner hash.
+If _Column I_ value is already in use, then that key will become the key for an array containing the different instances of the inner hash.
 
 .Like this
 [source, rb]
@@ -148,6 +154,8 @@ expected = {
   }
 }
 ----
+
+This an example of what I had originally thought to do but thought less optimal:
 
 .Example of what we can do if we make the value the key for first inner-most hash
 [source, rb]
