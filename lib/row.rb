@@ -1,6 +1,6 @@
-require 'csvheaders'
-require 'model_hardware_version_helpers'
-require 'hash_creation_helpers'
+require_relative './csvheaders.rb'
+require_relative './model_hardware_version_helpers'
+require_relative './hash_creation_helpers'
 
 class Row
   include CSVHeaders
