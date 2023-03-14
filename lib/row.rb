@@ -20,11 +20,11 @@ class Row
 
   def build_array_for_inner_hashes
     ##  We check if the value is already an array and append to it if so.
-    if model_hardware_version_value_is_collection_on?
-      _model_hardware_version << inner_hash
+    if model_hardware_version_value_is_collection?
+      model_hardware_version_value << inner_hash
     else
       ##  Otherwise we create a new hash
-      assign_model_hardware_version_on
+      assign_model_hardware_version_collection
     end
   end
 
