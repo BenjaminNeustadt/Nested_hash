@@ -3,32 +3,18 @@ require_relative '../lib/data_parse.rb'
 
 RSpec.describe '#data_parse' do
 
-  let(:input_csv) do
-    <<~CSV
-      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
-      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1.1.1,CHTS V1,GBCS Version 1,image1hash
-    CSV
-  end
-
-  let(:input_csv_2) do
-    <<~CSV
-      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
-      Version 2,2,Current,Type_Meter,Mfg_2,Model_2,2.0.0,AC,2.2.0,2.2.2,CHTS V2,GBCS Version 2,image2hash
-    CSV
-  end
-
-  let(:input_csv_3) do
-    <<~CSV
-      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
-      Version 3,3,Current,Type_Boiler,Mfg_3,Model_3,3.0.0,AC,3.3.0,3.3.3,CHTS V3,GBCS Version 3,image3hash
-    CSV
-  end
   #  A          B            C              D              E                                     F                                  G                                                      H                                     I                                                       J                  K                                                    L                              M
   # Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
   #  A          B   C            D            E    F   G H     I       J        K                L               M
   # Version 2.0,1,Current,Communications Hub,106C,4331,0,AC,433100AC,124074DA,"CHTS V1.0 ","GBCS Version 1.0 ",option2
 
   it 'parses a csv file with one row' do
+
+    input_csv=
+    <<~CSV
+      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+      Version 1,1,Current,Type_Communications,Mfg_1,Model_1,1.0.0,AC,1.1.0,1.1.1,CHTS V1,GBCS Version 1,image1hash
+    CSV
 
     expected_output = {
       'Type_Communications' => {               # D (Device_Type.name)
@@ -49,6 +35,12 @@ RSpec.describe '#data_parse' do
 
   it 'parses a different a csv file with one row' do
 
+    input_csv_2 = 
+    <<~CSV
+      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+      Version 2,2,Current,Type_Meter,Mfg_2,Model_2,2.0.0,AC,2.2.0,2.2.2,CHTS V2,GBCS Version 2,image2hash
+    CSV
+
     expected = {
       'Type_Meter' => {
         'Mfg_2' => {
@@ -67,6 +59,12 @@ RSpec.describe '#data_parse' do
   end
 
   it 'parses a different a csv file with one row' do
+
+    input_csv_3 = 
+    <<~CSV
+      Version,Entry.number,Entry.status,Device_Type.name,Device_Model.manufacturer_identifier,Device_Model.model_identifier,Device_Model.hardware_version.version,Device_Model.hardware_version.revision,Device_Model.model_identifier_concatenated_with_hardware_version,Device_Model.firmware_version,SMETS_CHTS Version.Version_number_and_effective_date,GBCS Version.version_number,Manufacturer_Image.hash
+      Version 3,3,Current,Type_Boiler,Mfg_3,Model_3,3.0.0,AC,3.3.0,3.3.3,CHTS V3,GBCS Version 3,image3hash
+    CSV
 
     expected = {
       'Type_Boiler' => {
