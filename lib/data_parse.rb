@@ -1,13 +1,19 @@
 require 'csv'
 require_relative './row'
 
+class CPL
+## The functionality of what a Row has has been abstracted to Row class
+
+def initialize(csv_file)
+  @csv_table = CSV.parse(csv_file, headers: true)
+end
+attr_reader :csv_table
+
 def model_hardware_exists?(object, data)
   object.model_hardware_version_key(data).length.positive?
 end
 
-## The functionality of what a Row has has been abstracted to Row class
-def data_parse(csv_file)
-  csv_table = CSV.parse(csv_file, headers: true)
+def data_parse
   data = {}
 
   csv_table.by_row.each do |r|
@@ -34,4 +40,6 @@ def data_parse(csv_file)
     end
   end
   data
+end
+
 end

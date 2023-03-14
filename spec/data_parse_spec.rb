@@ -43,7 +43,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected_output
   end
 
@@ -62,7 +62,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv_2)
+    actual = CPL.new(input_csv_2).data_parse
     expect(actual).to eq expected
   end
 
@@ -81,7 +81,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv_3)
+    actual = CPL.new(input_csv_3).data_parse
     expect(actual).to eq expected
   end
 
@@ -117,7 +117,7 @@ RSpec.describe '#data_parse' do
       },
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -164,7 +164,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -212,7 +212,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -246,7 +246,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -278,7 +278,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -312,7 +312,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -353,7 +353,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -410,7 +410,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -476,7 +476,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
@@ -559,7 +559,7 @@ RSpec.describe '#data_parse' do
       }
     }
 
-    actual = data_parse(input_csv)
+    actual = CPL.new(input_csv).data_parse
     expect(actual).to eq expected
   end
 
