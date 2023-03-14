@@ -3,11 +3,11 @@ module HashCreationHelpers
   private
 
   ## Creating hashes if they dont exist
-  def device_type_key(data)
+  def device_type_key
     data[device_type] ||= {}
   end
 
-  def manufacturer_key(data)
+  def manufacturer_key
     data[device_type][manufacturer] ||= {}
   end
 
@@ -22,14 +22,14 @@ module HashCreationHelpers
 
   public
 
-  def model_hardware_version_key(data)
+  def model_hardware_version_key
     data[device_type][manufacturer][model_hardware_version] ||= {}
   end
 
-  def create_hash_structures(data)
-    device_type_key(data)
-    manufacturer_key(data)
-    model_hardware_version_key(data)
+  def create_hash_structures
+    device_type_key
+    manufacturer_key
+    model_hardware_version_key
   end
 
 end
