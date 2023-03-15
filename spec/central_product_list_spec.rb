@@ -1,5 +1,4 @@
-require_relative '../lib/data_parse.rb'
-
+require_relative '../lib/central_product_list.rb'
 
 RSpec.describe '#data_parse' do
 
