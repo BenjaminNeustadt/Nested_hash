@@ -1,8 +1,9 @@
 require 'csv'
 require_relative './row'
+require_relative './csvparsehelpers'
 
 class CentralProductList
-## The functionality of what a Row has has been abstracted to Row class
+  include CSVParseHelpers
 
   def initialize(csv_or_xlsm_file)
     @csv_file = standardize_csv(csv_or_xlsm_file)
@@ -12,22 +13,6 @@ class CentralProductList
   
   attr_reader :csv_table, :accumulated_result
 
-  # WIth the following method we can add the possibility of using an xlsm file,
-  # if it is, the return will be the call to parse_xlsm(file_in_question),
-  # else it just returns the file
-
-  def standardize_csv(csv_or_xlsm_file)
-    File.extname(csv_or_xlsm_file) == '.xlsm' and
-     parse_xlsm(csv_or_xlsm_file) or
-     csv_or_xlsm_file
-  end
-
-  # This method makes use of 'roo' Gem to handle the xlsm file
-
-  def parse_xlsm(xlsm_file)
-    workbook = Roo::Spreadhseet.open(xlsm_file)
-    workbook.sheet(workbook.sheets.last).to_csv
-  end
 
   def model_hardware_exists?(object)
     object.model_hardware_version_key.length.positive?
