@@ -4,7 +4,7 @@ def hashify_csv(csv_file, destination)
 
   File.open(destination, 'w') do |f|
 
-    f.puts data_parse(file)
+    f.puts CentralProductList.new(file).data_parse
 
   end
 rescue Errno::ENOENT => e
