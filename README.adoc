@@ -13,7 +13,7 @@ Benjamin b.james.neustadt@gmail.com
 :highlightjsdir: ./highlight
 //URLs
 :url-hash-speed: https://stackoverflow.com/questions/12020984/hash-table-why-is-it-faster-than-arrays
-
+:url-roo-gem: https://github.com/roo-rb/roo
 
 == Brief
 
@@ -44,9 +44,36 @@ except those marked "Removed" in *column C*, which must be excluded.
 Add comments to explain your solution and why you believe it is optimal
 
 
+== Update
+
+The script has been updated to translate the data in a csv file (EG: "Central-Products-Lis.csv"),
+OR the last sheet in an xlsm workbook (EG: "Central-Products-Lilst_sheets.xlsm"),
+into a nested hash - provided the csv data in question contains the appropriate headers stated in the brief above.
+
+Previously, the csv file at the end of the xlsm file had been attained manually;
+following prompts by the technical director, it has been ammended to use the {url-roo-gem}[Roo gem to handle the parse],
+followed by the creation of a method that standardizes that sheet into a csv file so that it can be appropriately translated.
+
+The `data_parse` method has been ammended.
+Previously in the global scope,
+it operated as a private method on an instance of `main` `Object` in a procedural style (which Ruby supports).
+
+It has now been wrapped inside a class.
+The benefits are that we now are adherring to an object oriented way of programming,
+can better organise the code, accomodate extensions,
+and ultimately give better context to the `data_parse` method.
+Lastly, if we were to have several data sources, we could easily reuse the class and its methods
+- therein saving time and effort.
+
+Were the program to have fewer moving parts, it might make sense to keep it as a standalone method
+(as is the case for the "bin/lib/hashify_csv.rb").
+That said, in this case it makes greater sense for a class to be used. 
+
 == Usage
 
-The script turns the data in the Central-Products-Lis.csv file into a hash. To use the script run the command followed by the desired path/source file, and then followed by the destination file (i.e source.rb).
+The script turns the data in the file into a hash.
+To use the script run the command followed by the desired path/source file,
+and then followed by the destination file (i.e source.rb).
 
 Steps:
 
@@ -69,11 +96,16 @@ bundle install
 rspec -fd
 ----
 
-- Run the script by typing in the csv file and path as first argument, and the destination path as second argument:
-
+- Run the script by typing in the csv or xlsm file and path as a first argument, and the destination path as a second argument:
 
 ----
 bin/csv-to-hash Central-Products-Lis.csv destination.rb
+----
+
+_OR:_
+
+----
+bin/csv-to-hash Central-Products-List_sheets.xlsm destination.rb
 ----
 
 .Other csv files that have the same Headers content structure as the one provided can be run like this:
